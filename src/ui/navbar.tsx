@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Navbar() {
   return (
     <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-sm shadow-sm py-3 px-4">
@@ -6,14 +8,22 @@ export default function Navbar() {
         <div className="font-bold text-gray-800">Тихий эфир</div>
 
         {/* Простое меню — видно везде */}
-        <nav>
-          <a
-            href="#info"
+        <ul>
+          <Link
+            href="/"
             className="text-gray-700 font-medium hover:text-blue-600 transition-colors"
           >
             Главная
-          </a>
-        </nav>
+          </Link>
+        </ul>
+        <ul>
+          <Link
+            href="/dispatcher"
+            className="text-gray-700 font-medium hover:text-blue-600 transition-colors"
+          >
+            Диспетчер
+          </Link>
+        </ul>
       </div>
     </header>
   );
