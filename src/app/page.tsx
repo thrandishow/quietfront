@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
-import Navbar from "./ui/navbar";
-import Footer from "./ui/footer";
+import Navbar from "../ui/navbar";
+import Footer from "../ui/footer";
 
 export default function Home() {
   return (
