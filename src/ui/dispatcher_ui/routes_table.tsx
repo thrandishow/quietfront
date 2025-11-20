@@ -2,7 +2,7 @@
 
 import React from "react";
 
-type Route = {
+export type Route = {
   id: number;
   team: string;
   status: "Ожидание" | "Принято";

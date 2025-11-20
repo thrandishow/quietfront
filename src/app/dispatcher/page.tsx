@@ -1,6 +1,8 @@
-import RoutesTable from "@/ui/dispatcher_ui/routes_table";
+import RoutesTable, { Route } from "@/ui/dispatcher_ui/routes_table";
+import Navbar from "@/ui/navbar";
 
 async function getRoutesData() {
+  "use server";
   // Здесь можно делать запрос к API или базе данных
   return [
     { id: 1, team: "Отправляйтесь", status: "Ожидание" },
@@ -13,12 +15,15 @@ async function getRoutesData() {
     { id: 4, team: "Всё ок", status: "Принято" },
   ];
 }
+
 export default async function DispatcherPage() {
   const routes = await getRoutesData();
-
   return (
-    <div>
-      <RoutesTable routes={routes} />
-    </div>
+    <>
+      <Navbar></Navbar>
+      <div>
+        <RoutesTable routes={routes as Route[]} />
+      </div>
+    </>
   );
 }
