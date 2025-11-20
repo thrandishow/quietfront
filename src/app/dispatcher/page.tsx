@@ -1,5 +1,6 @@
 import RoutesTable, { Route } from "@/ui/dispatcher_ui/routes_table";
 import Navbar from "@/ui/navbar";
+import ButtonMicro from "@/ui/dispatcher_ui/button_micro";
 
 async function getRoutesData() {
   "use server";
@@ -21,6 +22,7 @@ export default async function DispatcherPage() {
   return (
     <>
       <Navbar></Navbar>
+      <ButtonMicro></ButtonMicro>
       <div>
         <RoutesTable routes={routes as Route[]} />
       </div>
