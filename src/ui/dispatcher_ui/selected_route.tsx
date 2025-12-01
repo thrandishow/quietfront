@@ -7,7 +7,7 @@ type SelectedRouteDisplayProps = {
   selectedRoute: {
     id: number;
     team: string;
-    status: "Ожидание" | "Принято";
+    status: "Ожидание" | "Принято" | "Отправлено";
   } | null;
 };
 
@@ -28,7 +28,9 @@ export default function SelectedRouteDisplay({
       className={`rounded-lg p-5 transition-all ${
         selectedRoute.status === "Принято"
           ? "bg-green-50 border-l-4 border-green-500"
-          : "bg-red-50 border-l-4 border-red-500"
+          : selectedRoute.status === "Отправлено"
+          ? "bg-yellow-50 border-l-4 border-yellow-500" // Жёлтый для отправленных
+          : "bg-red-50 border-l-4 border-red-500" // Красный для ожидания
       }`}
     >
       <div className="flex justify-between items-start">
@@ -50,7 +52,9 @@ export default function SelectedRouteDisplay({
           className={`px-3 py-1 rounded-full text-sm font-medium ${
             selectedRoute.status === "Принято"
               ? "bg-green-100 text-green-800"
-              : "bg-red-100 text-red-800"
+              : selectedRoute.status === "Отправлено"
+              ? "bg-yellow-100 text-yellow-800" // Жёлтый для отправленных
+              : "bg-red-100 text-red-800" // Красный для ожидания
           }`}
         >
           {selectedRoute.status}

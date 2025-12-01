@@ -9,22 +9,29 @@ import SelectedRouteDisplay from "@/ui/dispatcher_ui/selected_route";
 import { useState, useEffect } from "react";
 
 // Вспомогательная функция для валидации статуса
-function validateStatus(status: string): "Ожидание" | "Принято" {
-  return status === "Принято" ? "Принято" : "Ожидание";
+function validateStatus(status: string): "Ожидание" | "Принято" | "Отправлено" {
+  switch (status) {
+    case "Принято":
+      return "Принято";
+    case "Отправлено":
+      return "Отправлено";
+    default:
+      return "Ожидание";
+  }
 }
 
 async function getRoutesData(): Promise<Route[]> {
   // Данные для демонстрации
   const rawData = [
-    { id: 1, team: "Отправляйтесь", status: "Ожидание" },
+    { id: 1, team: "Нет команды", status: "Ожидание" },
     { id: 2, team: "Оставайтесь на станции", status: "Принято" },
     {
       id: 3,
-      team: "Выпускайте пассажиров и едьте на ремонт",
-      status: "Ожидание",
+      team: "Проезжайте станцию, не сажайте пассажиров",
+      status: "Отправлено",
     },
-    { id: 4, team: "Всё ок", status: "Принято" },
-    { id: 5, team: "Эвакуация с центральной станции", status: "Ожидание" },
+    { id: 4, team: "Остановитесь в туннеле", status: "Принято" },
+    { id: 5, team: "Едьте на ремонт", status: "Отправлено" },
     { id: 6, team: "Тестовый маршрут для проверки", status: "Принято" },
     { id: 7, team: "Дополнительная команда для теста", status: "Ожидание" },
   ];

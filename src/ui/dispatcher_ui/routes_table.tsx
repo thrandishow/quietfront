@@ -4,7 +4,7 @@
 export type Route = {
   id: number;
   team: string;
-  status: "Принято" | "Ожидание";
+  status: "Принято" | "Ожидание" | "Отправлено";
 };
 
 type RoutesTableProps = {
@@ -55,7 +55,9 @@ export default function RoutesTable({
                 className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                   route.status === "Принято"
                     ? "bg-green-100 text-green-800"
-                    : "bg-red-100 text-red-800"
+                    : route.status === "Отправлено"
+                    ? "bg-yellow-100 text-yellow-800" // Желтый для "Отправлено"
+                    : "bg-red-100 text-red-800" // Красный для "Ожидание"
                 }`}
               >
                 {route.status}

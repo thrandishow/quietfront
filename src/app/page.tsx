@@ -20,9 +20,6 @@ export default function Home() {
               <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-white leading-tight">
                 Связь между машинистом и диспетчером.
               </h2>
-              <p className="text-xl md:text-2xl mb-8 text-white font-medium">
-                Быстро. Надёжно. Безопасно
-              </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
                 <a
                   href="#addinfo"
@@ -71,9 +68,7 @@ export default function Home() {
                 Мы это меняем.
               </h2>
               <p className="text-base md:text-lg text-gray-700 leading-relaxed">
-                Наша система обеспечивает мгновенную, безошибочную и
-                подтверждённую связь между диспетчером и машинистом. Команды
-                приходят прямо в кабину поезда — чётко, надёжно и без помех.
+                Команды приходят прямо в кабину поезда — чётко
               </p>
             </div>
 
