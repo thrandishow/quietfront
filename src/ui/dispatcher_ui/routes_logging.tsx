@@ -1,43 +1,60 @@
-// LoggingTable.tsx
-export default function LoggingTable() {
+// @/ui/dispatcher_ui/routes_logging.tsx
+import { LogEntry } from "@/app/dispatcher/page";
+import { Check, AlertCircle, Info } from "lucide-react";
+
+type LoggingTableProps = {
+  logs: LogEntry[];
+};
+
+export default function LoggingTable({ logs }: LoggingTableProps) {
   return (
-    <div className="flex flex-col h-full bg-white border border-gray-200 rounded-xl overflow-hidden">
-      <div className="border-b border-gray-200 px-4 py-3 bg-gray-50">
-        <h2 className="text-sm font-medium text-gray-800">Последние команды</h2>
-      </div>
+    <div className="divide-y divide-gray-200">
+      {logs.length === 0 ? (
+        <div className="px-4 py-8 text-center text-gray-500 text-sm">
+          Журнал событий пуст
+        </div>
+      ) : (
+        <div className="divide-y divide-gray-100">
+          {logs.map((log) => (
+            <div key={log.id} className="p-3 hover:bg-gray-50">
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5">
+                  {log.type === "success" && (
+                    <Check size={16} className="text-green-500" />
+                  )}
+                  {log.type === "error" && (
+                    <AlertCircle size={16} className="text-red-500" />
+                  )}
+                  {log.type === "info" && (
+                    <Info size={16} className="text-blue-500" />
+                  )}
+                </div>
 
-      <div className="overflow-y-auto flex-1" style={{ maxHeight: "280px" }}>
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Команда
-              </th>
-              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Время
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <tr key={i} className="hover:bg-gray-50">
-                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
-                  /command-{i + 1}
-                </td>
-                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
-                  12:{(10 + i).toString().padStart(2, "0")}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 break-words">
+                    {log.message}
+                  </p>
 
-      <div className="p-4 border-t border-gray-200 bg-gray-50">
-        <button className="w-full text-base px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-colors font-medium">
-          Очистить
-        </button>
-      </div>
+                  <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
+                    {log.routeId > 0 && (
+                      <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded">
+                        Маршрут #{log.routeId}
+                      </span>
+                    )}
+
+                    <time className="text-gray-500">
+                      {log.timestamp.toLocaleTimeString("ru-RU", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </time>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
