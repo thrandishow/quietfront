@@ -1,3 +1,4 @@
+// @/ui/dispatcher_ui/button_micro.tsx
 "use client";
 import { Mic } from "lucide-react";
 
@@ -34,8 +35,14 @@ export default function ButtonMicro({
       </div>
 
       <span className="text-base font-semibold text-center">
-        {isRecording ? "Остановить запись" : "Записать команду"}
+        {isRecording ? "Идет запись..." : "Записать аудио"}
       </span>
+
+      {isRecording && (
+        <span className="text-xs text-red-500 mt-1 animate-pulse">
+          Говорите в микрофон
+        </span>
+      )}
     </button>
   );
 }

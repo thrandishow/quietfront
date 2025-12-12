@@ -1,26 +1,25 @@
+// @/ui/dispatcher_ui/button_send.tsx
 "use client";
-import { Send, Check, AlertCircle, Info } from "lucide-react";
+import { Send, Check, AlertCircle } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
 type ButtonSendProps = {
   onClick: () => void;
   disabled?: boolean;
-  isSending?: boolean;
-  hasAudioToSubmit?: boolean;
+  label?: string;
 };
 
 export default function ButtonSend({
   onClick,
   disabled = false,
-  isSending = false,
-  hasAudioToSubmit = false,
+  label = "Отправить команду",
 }: ButtonSendProps) {
   const [isSent, setIsSent] = useState(false);
   const [error, setError] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleClick = () => {
-    if (disabled || isSending) return;
+    if (disabled) return;
 
     try {
       onClick();
@@ -52,36 +51,22 @@ export default function ButtonSend({
           ? "border-red-500 bg-red-50 text-red-700"
           : isSent
           ? "border-green-500 bg-green-50 text-green-700"
-          : isSending
-          ? "border-blue-500 bg-blue-50 text-blue-700 cursor-wait"
-          : disabled && !hasAudioToSubmit
+          : disabled
           ? "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
           : "border-gray-300 hover:border-black hover:bg-gray-50 text-gray-700"
       }`}
     >
-      {isSending ? (
-        <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      <span className="text-base font-semibold">
+        {error ? "Ошибка отправки!" : isSent ? "Отправлено!" : label}
+      </span>
+
+      {error ? (
+        <AlertCircle size={20} className="text-red-500" />
       ) : isSent ? (
         <Check size={20} className="text-green-500" />
-      ) : error ? (
-        <AlertCircle size={20} className="text-red-500" />
-      ) : !hasAudioToSubmit ? (
-        <Info size={20} className="text-gray-400" />
       ) : (
         <Send size={20} className="transition-transform" />
       )}
-
-      <span className="text-base font-semibold">
-        {error
-          ? "Ошибка!"
-          : isSent
-          ? "Отправлено!"
-          : isSending
-          ? "Отправка..."
-          : !hasAudioToSubmit
-          ? "Нет записи"
-          : "Отправить команду"}
-      </span>
     </button>
   );
 }
