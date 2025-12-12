@@ -16,8 +16,9 @@ const convertToWAV = async (audioBlob: Blob): Promise<Blob> => {
 
     reader.onload = async () => {
       try {
-        const audioContext = new (window.AudioContext ||
-          (window as any).webkitAudioContext)();
+        const AudioContext =
+          window.AudioContext || (window as any).webkitAudioContext;
+        const audioContext = new AudioContext();
         const arrayBuffer = reader.result as ArrayBuffer;
 
         // Декодируем аудио
@@ -47,13 +48,10 @@ const createWAVBlob = (audioBuffer: AudioBuffer, sampleRate: number): Blob => {
   const view = new DataView(buffer);
   const channels = [];
 
-  let i,
-    sample,
-    offset = 0;
-  let pos = 0;
+  let offset = 0;
 
   // Устанавливаем каналы
-  for (i = 0; i < numOfChan; i++) {
+  for (let i = 0; i < numOfChan; i++) {
     channels.push(audioBuffer.getChannelData(i));
   }
 
@@ -86,11 +84,11 @@ const createWAVBlob = (audioBuffer: AudioBuffer, sampleRate: number): Blob => {
   offset += 4;
 
   // Записываем аудиоданные
-  for (i = 0; i < audioBuffer.length; i++) {
+  for (let i = 0; i < audioBuffer.length; i++) {
     for (let channel = 0; channel < numOfChan; channel++) {
-      sample = Math.max(-1, Math.min(1, channels[channel][i]));
-      sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
-      view.setInt16(offset, sample, true);
+      const sample = Math.max(-1, Math.min(1, channels[channel][i]));
+      const val = sample < 0 ? sample * 32768 : sample * 32767;
+      view.setInt16(offset, val, true);
       offset += 2;
     }
   }
@@ -208,16 +206,63 @@ export default function DispatcherPage() {
     setLogs((prev) => [newLog, ...prev]);
   }, []);
 
+  // 🔥 ФУНКЦИЯ ПОЛНОЙ ОЧИСТКИ ПРЕДЫДУЩИХ РЕСУРСОВ
+  const cleanupPreviousRecording = () => {
+    // Останавливаем текущую запись, если она идет
+    if (
+      mediaRecorderRef.current &&
+      mediaRecorderRef.current.state === "recording"
+    ) {
+      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current.onstop = null;
+    }
+
+    // Останавливаем поток
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+
+    // Очищаем таймер
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+
+    // Очищаем буфер аудио
+    audioChunksRef.current = [];
+
+    // Очищаем URL объектов
+    if (audioUrl) {
+      URL.revokeObjectURL(audioUrl);
+      setAudioUrl(null);
+    }
+
+    // Сбрасываем состояния
+    setHasAudioToSubmit(false);
+    setAudioSize(null);
+    setRecognizedText(null);
+    setIsRecording(false);
+    setProcessingProgress(0);
+
+    // Отменяем текущую обработку, если она есть
+    if (abortController) {
+      abortController.abort();
+      setAbortController(null);
+    }
+
+    // Очищаем таймеры прогресса
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+      progressIntervalRef.current = null;
+    }
+  };
+
   // =============== АУДИОЗАПИСЬ ===============
   const startRecording = async () => {
     try {
-      if (isRecording) return;
-
-      // Сбрасываем состояние
-      setHasAudioToSubmit(false);
-      setAudioUrl(null);
-      setAudioSize(null);
-      setRecognizedText(null);
+      // 🔥 ПОЛНАЯ ОЧИСТКА ПРЕДЫДУЩИХ РЕСУРСОВ
+      cleanupPreviousRecording();
 
       // Запрашиваем доступ к микрофону
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -241,6 +286,9 @@ export default function DispatcherPage() {
         audioBitsPerSecond: 128000, // Качество для последующей конвертации в WAV
       });
 
+      // Очищаем буфер перед началом новой записи
+      audioChunksRef.current = [];
+
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
           audioChunksRef.current.push(event.data);
@@ -258,6 +306,11 @@ export default function DispatcherPage() {
             // Конвертируем в WAV
             const wavBlob = await convertToWAV(tempBlob);
 
+            // Очищаем старый URL перед созданием нового
+            if (audioUrl) {
+              URL.revokeObjectURL(audioUrl);
+            }
+
             // Создаем URL для прослушивания
             const url = URL.createObjectURL(wavBlob);
             setAudioUrl(url);
@@ -272,9 +325,6 @@ export default function DispatcherPage() {
               routeId: selectedRoute?.id || -1,
               type: "info",
             });
-
-            // Автоочистка URL при размонтировании
-            return () => URL.revokeObjectURL(url);
           } catch (error) {
             console.error("Ошибка конвертации в WAV:", error);
             addLog({
@@ -346,6 +396,29 @@ export default function DispatcherPage() {
     }
   };
 
+  // 🔥 ИСПРАВЛЕННАЯ ФУНКЦИЯ ОЧИСТКИ ПОСЛЕ ОТПРАВКИ
+  const cleanupAfterSend = (keepRecognizedText = false) => {
+    // Очищаем URL после отправки
+    if (audioUrl) {
+      URL.revokeObjectURL(audioUrl);
+      setAudioUrl(null);
+    }
+
+    // Сбрасываем состояния
+    setHasAudioToSubmit(false);
+    setAudioSize(null);
+    setIsProcessing(false);
+    setProcessingStage(null);
+    setProcessingProgress(0);
+    setAbortController(null);
+
+    // Очищаем таймеры прогресса
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+      progressIntervalRef.current = null;
+    }
+  };
+
   // =============== ОТПРАВКА ===============
   const sendAudioCommand = async () => {
     if (!selectedRoute || isProcessing || !hasAudioToSubmit || !audioUrl)
@@ -358,7 +431,7 @@ export default function DispatcherPage() {
     setIsProcessing(true);
     setProcessingStage("uploading");
     setProcessingProgress(0);
-    setRecognizedText(null);
+    setRecognizedText(null); // Очищаем перед новой отправкой
 
     // Имитация прогресса загрузки (для UX)
     progressIntervalRef.current = setInterval(() => {
@@ -422,7 +495,14 @@ export default function DispatcherPage() {
 
       const result = await transcribeResponse.json();
       console.log("Распознанный текст:", result.text);
+
+      // Устанавливаем распознанный текст
       setRecognizedText(result.text);
+
+      // Автоматическое скрытие через 15 секунд
+      setTimeout(() => {
+        setRecognizedText((prev) => (prev === result.text ? null : prev));
+      }, 15000);
 
       addLog({
         message: `Распознано: "${result.text}" (время: ${Math.round(
@@ -431,11 +511,6 @@ export default function DispatcherPage() {
         routeId: selectedRoute.id,
         type: "success",
       });
-
-      // Сбрасываем состояние
-      setHasAudioToSubmit(false);
-      setAudioUrl(null);
-      setAudioSize(null);
     } catch (error) {
       console.error("Ошибка отправки аудиокоманды:", error);
 
@@ -491,19 +566,9 @@ export default function DispatcherPage() {
         });
       }
     } finally {
-      // Очищаем все таймеры и контроллеры
-      if (progressIntervalRef.current) {
-        clearInterval(progressIntervalRef.current);
-        progressIntervalRef.current = null;
-      }
-
-      setIsProcessing(false);
-      setProcessingStage(null);
-      setProcessingProgress(0);
-      setAbortController(null);
-
-      // Очищаем URL
-      if (audioUrl) URL.revokeObjectURL(audioUrl);
+      // 🔥 СОХРАНЯЕМ РАСПОЗНАННЫЙ ТЕКСТ ПРИ УСПЕШНОЙ ОТПРАВКЕ
+      const shouldKeepText = recognizedText !== null;
+      cleanupAfterSend(shouldKeepText);
     }
   };
 
@@ -521,22 +586,10 @@ export default function DispatcherPage() {
   // Очистка ресурсов при размонтировании
   useEffect(() => {
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-      if (progressIntervalRef.current)
-        clearInterval(progressIntervalRef.current);
-      if (mediaRecorderRef.current) {
-        mediaRecorderRef.current.onstop = null;
-        if (mediaRecorderRef.current.state === "recording") {
-          mediaRecorderRef.current.stop();
-        }
-      }
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop());
-      }
-      if (audioUrl) URL.revokeObjectURL(audioUrl);
-      if (abortController) abortController.abort();
+      cleanupPreviousRecording();
+      cleanupAfterSend();
     };
-  }, [audioUrl, abortController]);
+  }, []);
 
   const handleClearLogs = useCallback(() => {
     setLogs([]);
