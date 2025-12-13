@@ -1,68 +1,54 @@
-// @/ui/dispatcher_ui/routes_logging.tsx
-import { AudioLogEntry } from "@/app/dispatcher/page";
-import { Check, AlertCircle } from "lucide-react";
+import { LogEntry } from "@/app/types/dispatcher"; // Импортируем обновленный тип
+import { MessageSquare, AlertCircle } from "lucide-react";
 
 type LoggingTableProps = {
-  logs: AudioLogEntry[];
+  logs: LogEntry[];
 };
 
 export default function LoggingTable({ logs }: LoggingTableProps) {
   return (
-    <div className="divide-y divide-gray-200">
+    <div className="flex flex-col h-full">
       {logs.length === 0 ? (
-        <div className="px-4 py-8 text-center text-gray-500 text-sm">
+        <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">
           История команд пуста
         </div>
       ) : (
-        <div className="divide-y divide-gray-200">
+        <div className="divide-y divide-gray-100">
           {logs.map((log) => (
-            <div key={log.id} className="p-3 hover:bg-gray-50">
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span
-                      className={`px-2 py-0.5 rounded text-xs font-medium ${
-                        log.status === "sent"
-                          ? "bg-green-100 text-green-800"
-                          : log.status === "sending"
-                          ? "bg-blue-100 text-blue-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
-                    >
-                      {log.status === "sent"
-                        ? "Доставлено"
-                        : log.status === "sending"
-                        ? "Отправляется"
-                        : "Ошибка отправки"}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      ID команды: {log.id}
-                    </span>
-                  </div>
-
-                  <p className="text-sm font-medium text-gray-900">
+            <div
+              key={log.id}
+              className="p-3 hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex justify-between items-start mb-1">
+                {/* ID Маршрута */}
+                <div className="flex items-center gap-2">
+                  <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-0.5 rounded">
                     Маршрут #{log.routeId}
-                  </p>
-
-                  <audio
-                    src={log.audioUrl}
-                    controls
-                    className="w-full mt-2 h-8"
-                    onEnded={() => URL.revokeObjectURL(log.audioUrl)}
-                  />
+                  </span>
+                  {log.isError && (
+                    <span className="text-red-500 text-xs flex items-center">
+                      <AlertCircle size={12} className="mr-1" /> Ошибка
+                    </span>
+                  )}
                 </div>
 
-                <div className="text-right ml-3">
-                  <time className="text-xs text-gray-500 block">
-                    {log.timestamp.toLocaleTimeString("ru-RU", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </time>
-                  <time className="text-xs text-gray-400 block">
-                    {log.timestamp.toLocaleDateString("ru-RU")}
-                  </time>
-                </div>
+                {/* Время */}
+                <time className="text-xs text-gray-400 whitespace-nowrap ml-2">
+                  {log.timestamp.toLocaleTimeString("ru-RU", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                  })}
+                </time>
+              </div>
+
+              {/* Текст ответа сервера */}
+              <div
+                className={`text-sm mt-1 leading-relaxed ${
+                  log.isError ? "text-red-600" : "text-gray-800"
+                }`}
+              >
+                {log.text}
               </div>
             </div>
           ))}

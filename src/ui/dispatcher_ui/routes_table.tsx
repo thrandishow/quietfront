@@ -1,11 +1,6 @@
-// routes_table.tsx
 "use client";
 
-export type Route = {
-  id: number;
-  team: string;
-  status: "Принято" | "Ожидание" | "Отправлено";
-};
+import { Route } from "@/app/types/dispatcher"; // Лучше брать тип из общего файла
 
 type RoutesTableProps = {
   routes: Route[];
@@ -38,10 +33,10 @@ export default function RoutesTable({
           <tr
             key={route.id}
             onClick={() => onRouteSelect(route)}
-            className={`cursor-pointer hover:bg-gray-50 ${
+            className={`cursor-pointer transition-colors ${
               selectedRouteId === route.id
                 ? "bg-blue-50 border-l-4 border-blue-500"
-                : ""
+                : "hover:bg-gray-50 border-l-4 border-transparent"
             }`}
           >
             <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -56,8 +51,8 @@ export default function RoutesTable({
                   route.status === "Принято"
                     ? "bg-green-100 text-green-800"
                     : route.status === "Отправлено"
-                    ? "bg-yellow-100 text-yellow-800" // Желтый для "Отправлено"
-                    : "bg-red-100 text-red-800" // Красный для "Ожидание"
+                    ? "bg-blue-100 text-blue-800" // Синий обычно лучше подходит для "Sent"
+                    : "bg-gray-100 text-gray-800" // Серый или Красный для ожидания
                 }`}
               >
                 {route.status}
