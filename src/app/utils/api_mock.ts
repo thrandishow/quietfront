@@ -17,7 +17,7 @@ export async function getRoutesData(): Promise<Route[]> {
   // await new Promise(resolve => setTimeout(resolve, 500));
 
   const rawData = [
-    { id: 1, team: "Маршрут 101", status: "Ожидание" },
+    { id: 1, team: "Ожидание команды", status: "Ожидание" },
     { id: 2, team: "Оставайтесь на станции", status: "Принято" },
     { id: 3, team: "Проезжайте станцию", status: "Отправлено" },
     { id: 4, team: "Остановитесь в туннеле", status: "Принято" },

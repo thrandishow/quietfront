@@ -103,7 +103,7 @@ export default function DispatcherPage() {
       setRoutes((prevRoutes) =>
         prevRoutes.map((route) =>
           route.id === selectedRoute.id
-            ? { ...route, status: "Отправлено" }
+            ? { ...route, status: "Отправлено", team: result.text }
             : route
         )
       );
