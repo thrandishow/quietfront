@@ -81,8 +81,8 @@ export default function DispatcherPage() {
 
     try {
       const formData = new FormData();
+      formData.append("id", String(selectedRoute.id));
       formData.append("file", recorder.audioBlob, `command_${Date.now()}.wav`);
-
       const response = await fetch("http://localhost:8000/transcribe", {
         method: "POST",
         body: formData,
