@@ -98,7 +98,7 @@ export default function DispatcherPage() {
 
       // Логируем ответ
       addLog(result.text, selectedRoute.id, false);
-
+      console.log(result)
       // 🔥 Обновляем статус маршрута на "Отправлено"
       setRoutes((prevRoutes) =>
         prevRoutes.map((route) =>
@@ -110,7 +110,7 @@ export default function DispatcherPage() {
 
       // Обновляем текущий выбранный маршрут
       setSelectedRoute((prev) =>
-        prev ? { ...prev, status: "Отправлено" } : null
+        prev ? { ...prev, status: "Отправлено", team: result.text } : null
       );
 
       // Сброс аудио
@@ -161,13 +161,12 @@ export default function DispatcherPage() {
                     {/* Бейдж статуса */}
                     {selectedRoute && (
                       <span
-                        className={`text-xs px-2 py-0.5 rounded-full ${
-                          selectedRoute.status === "Отправлено"
-                            ? "bg-blue-100 text-blue-800"
-                            : selectedRoute.status === "Принято"
+                        className={`text-xs px-2 py-0.5 rounded-full ${selectedRoute.status === "Отправлено"
+                          ? "bg-blue-100 text-blue-800"
+                          : selectedRoute.status === "Принято"
                             ? "bg-green-100 text-green-800"
                             : "bg-gray-100 text-gray-800"
-                        }`}
+                          }`}
                       >
                         {selectedRoute.status}
                       </span>
